@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,6 +14,7 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
     <div class="app-container">
         <!-- Header -->
@@ -25,7 +27,7 @@
             <!-- Left Panel: Controls -->
             <aside class="panel controls-panel glass">
                 <h2>Algorithm Configuration</h2>
-                
+
                 <div class="form-group">
                     <label for="function-preset">Sample Functions</label>
                     <select id="function-preset">
@@ -66,7 +68,7 @@
                         </select>
                     </div>
                 </div>
-                
+
                 <div class="form-group">
                     <label for="anim-speed">Animation Speed (ms)</label>
                     <input type="range" id="anim-speed" min="10" max="1000" value="200" step="10">
@@ -80,7 +82,7 @@
                 </div>
 
                 <hr class="divider">
-                
+
                 <button id="btn-random-restart" class="btn accent">Try Random Restart</button>
             </aside>
 
@@ -92,7 +94,7 @@
             <!-- Right Panel: Results & Iteration Info -->
             <aside class="panel results-panel glass">
                 <h2>Current State</h2>
-                
+
                 <div class="state-metrics">
                     <div class="metric">
                         <span class="label">Step</span>
@@ -142,4 +144,5 @@
     <!-- Custom JS -->
     <script src="script.js"></script>
 </body>
+
 </html>

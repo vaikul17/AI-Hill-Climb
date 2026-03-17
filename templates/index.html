@@ -1,183 +1,193 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hill Climbing — Function Optimization</title>
-    <meta name="description" content="Interactive Hill Climbing function optimization with local vs global optimum analysis.">
+    <meta name="description"
+        content="Interactive Hill Climbing function optimization with local vs global optimum analysis.">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
     <link rel="stylesheet" href="/static/style.css">
 </head>
+
 <body>
 
-<!-- ─── HEADER ──────────────────────────────────────── -->
-<header class="header">
-    <h1>Hill Climbing Based Function Optimization</h1>
-    <p class="subtitle">AI Technique: Hill Climbing &nbsp;|&nbsp; Representation: State Space &nbsp;|&nbsp; Tools: Python</p>
-</header>
+    <!-- ─── HEADER ──────────────────────────────────────── -->
+    <header class="header">
+        <h1>Hill Climbing Based Function Optimization</h1>
+        <p class="subtitle">AI Technique: Hill Climbing &nbsp;|&nbsp; Representation: State Space &nbsp;|&nbsp; Tools:
+            Python</p>
+    </header>
 
-<div class="app-layout">
+    <div class="app-layout">
 
-    <!-- ─── LEFT SIDEBAR ──────────────────────────────── -->
-    <aside class="sidebar glass" id="sidebar">
-        <h2 class="section-title">Configuration</h2>
+        <!-- ─── LEFT SIDEBAR ──────────────────────────────── -->
+        <aside class="sidebar glass" id="sidebar">
+            <h2 class="section-title">Configuration</h2>
 
-        <!-- Function Selection -->
-        <div class="form-group">
-            <label for="sel-preset">Function Preset</label>
-            <select id="sel-preset">
-                {% for p in presets %}
-                <option value="{{ p.id }}" data-expr="{{ p.expr }}" data-lo="{{ p.range_lo }}" data-hi="{{ p.range_hi }}">{{ p.name }}</option>
-                {% endfor %}
-                <option value="custom">Custom…</option>
-            </select>
-        </div>
-        <div class="form-group" id="custom-expr-group" style="display:none;">
-            <label for="inp-expr">Custom Expression (numpy syntax)</label>
-            <input type="text" id="inp-expr" placeholder="e.g. x**2 + y**2">
-        </div>
+            <!-- Function Selection -->
+            <div class="form-group">
+                <label for="sel-preset">Function Preset</label>
+                <select id="sel-preset">
+                    {% for p in presets %}
+                    <option value="{{ p.id }}" data-expr="{{ p.expr }}" data-lo="{{ p.range_lo }}"
+                        data-hi="{{ p.range_hi }}">{{ p.name }}</option>
+                    {% endfor %}
+                    <option value="custom">Custom…</option>
+                </select>
+            </div>
+            <div class="form-group" id="custom-expr-group" style="display:none;">
+                <label for="inp-expr">Custom Expression (numpy syntax)</label>
+                <input type="text" id="inp-expr" placeholder="e.g. x**2 + y**2">
+            </div>
 
-        <hr class="divider">
+            <hr class="divider">
 
-        <!-- Algorithm -->
-        <div class="form-group">
-            <label for="sel-algo">Select Algorithm</label>
-            <select id="sel-algo">
-                <option value="simple">Simple Hill Climbing</option>
-                <option value="steepest" selected>Steepest Ascent Hill Climbing</option>
-                <option value="random_restart">Random-Restart Hill Climbing</option>
-            </select>
-        </div>
+            <!-- Algorithm -->
+            <div class="form-group">
+                <label for="sel-algo">Select Algorithm</label>
+                <select id="sel-algo">
+                    <option value="simple">Simple Hill Climbing</option>
+                    <option value="steepest" selected>Steepest Ascent Hill Climbing</option>
+                    <option value="random_restart">Random-Restart Hill Climbing</option>
+                </select>
+            </div>
 
-        <!-- Goal -->
-        <div class="form-group">
-            <label for="sel-goal">Optimization Goal</label>
-            <select id="sel-goal">
-                <option value="minimize" selected>Minimize</option>
-                <option value="maximize">Maximize</option>
-            </select>
-        </div>
+            <!-- Goal -->
+            <div class="form-group">
+                <label for="sel-goal">Optimization Goal</label>
+                <select id="sel-goal">
+                    <option value="minimize" selected>Minimize</option>
+                    <option value="maximize">Maximize</option>
+                </select>
+            </div>
 
-        <hr class="divider">
+            <hr class="divider">
 
-        <!-- Start position (hidden for random restart) -->
-        <div id="start-pos-group">
+            <!-- Start position (hidden for random restart) -->
+            <div id="start-pos-group">
+                <div class="form-row">
+                    <div class="form-group half">
+                        <label for="inp-sx">Start X</label>
+                        <input type="number" id="inp-sx" value="3" step="0.1">
+                    </div>
+                    <div class="form-group half">
+                        <label for="inp-sy">Start Y</label>
+                        <input type="number" id="inp-sy" value="3" step="0.1">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step Size -->
+            <div class="form-group">
+                <label for="rng-step">Step Size <span class="range-val" id="lbl-step">0.10</span></label>
+                <input type="range" id="rng-step" min="0.01" max="1" value="0.10" step="0.01">
+            </div>
+
+            <!-- Max Iterations -->
+            <div class="form-group">
+                <label for="rng-iter">Max Iterations <span class="range-val" id="lbl-iter">500</span></label>
+                <input type="range" id="rng-iter" min="10" max="2000" value="500" step="10">
+            </div>
+
+            <!-- Range -->
+            <div class="form-group">
+                <label class="range-heading">Search Domain (Range Min / Max)</label>
+                <p class="helper-text">Defines the coordinate boundaries <strong>[min, max]</strong> for both x and y
+                    axes. The global optimum is computed by grid-searching across this domain. For Random-Restart,
+                    starting points are sampled uniformly within this range.</p>
+            </div>
             <div class="form-row">
                 <div class="form-group half">
-                    <label for="inp-sx">Start X</label>
-                    <input type="number" id="inp-sx" value="3" step="0.1">
+                    <label for="inp-lo">Range Min</label>
+                    <input type="number" id="inp-lo" value="-5" step="1">
                 </div>
                 <div class="form-group half">
-                    <label for="inp-sy">Start Y</label>
-                    <input type="number" id="inp-sy" value="3" step="0.1">
+                    <label for="inp-hi">Range Max</label>
+                    <input type="number" id="inp-hi" value="5" step="1">
                 </div>
             </div>
-        </div>
 
-        <!-- Step Size -->
-        <div class="form-group">
-            <label for="rng-step">Step Size <span class="range-val" id="lbl-step">0.10</span></label>
-            <input type="range" id="rng-step" min="0.01" max="1" value="0.10" step="0.01">
-        </div>
-
-        <!-- Max Iterations -->
-        <div class="form-group">
-            <label for="rng-iter">Max Iterations <span class="range-val" id="lbl-iter">500</span></label>
-            <input type="range" id="rng-iter" min="10" max="2000" value="500" step="10">
-        </div>
-
-        <!-- Range -->
-        <div class="form-group">
-            <label class="range-heading">Search Domain (Range Min / Max)</label>
-            <p class="helper-text">Defines the coordinate boundaries <strong>[min, max]</strong> for both x and y axes. The global optimum is computed by grid-searching across this domain.  For Random-Restart, starting points are sampled uniformly within this range.</p>
-        </div>
-        <div class="form-row">
-            <div class="form-group half">
-                <label for="inp-lo">Range Min</label>
-                <input type="number" id="inp-lo" value="-5" step="1">
+            <!-- Animation speed -->
+            <div class="form-group">
+                <label for="rng-speed">Animation Speed <span class="range-val" id="lbl-speed">30 ms</span></label>
+                <input type="range" id="rng-speed" min="5" max="500" value="30" step="5">
             </div>
-            <div class="form-group half">
-                <label for="inp-hi">Range Max</label>
-                <input type="number" id="inp-hi" value="5" step="1">
-            </div>
-        </div>
 
-        <!-- Animation speed -->
-        <div class="form-group">
-            <label for="rng-speed">Animation Speed <span class="range-val" id="lbl-speed">30 ms</span></label>
-            <input type="range" id="rng-speed" min="5" max="500" value="30" step="5">
-        </div>
+            <button id="btn-run" class="btn primary full">▶ Run Optimization</button>
+            <button id="btn-reset" class="btn outline full">↺ Reset</button>
+        </aside>
 
-        <button id="btn-run" class="btn primary full">▶ Run Optimization</button>
-        <button id="btn-reset" class="btn outline full">↺ Reset</button>
-    </aside>
+        <!-- ─── MAIN CONTENT ─────────────────────────────── -->
+        <main class="main-area">
 
-    <!-- ─── MAIN CONTENT ─────────────────────────────── -->
-    <main class="main-area">
-
-        <!-- Result Cards Row -->
-        <section class="card-row" id="card-row" style="display:none;">
-            <div class="result-card glass" id="card-algo">
-                <span class="card-label">ALGORITHM</span>
-                <h3 id="card-algo-name">—</h3>
-                <p class="card-sub" id="card-algo-steps"></p>
-            </div>
-            <div class="result-card glass" id="card-found">
-                <span class="card-label found-label">FOUND MINIMUM</span>
-                <h3 id="card-found-val">—</h3>
-                <p class="card-sub" id="card-found-pos"></p>
-            </div>
-            <div class="result-card glass" id="card-global">
-                <span class="card-label global-label">GLOBAL MINIMUM</span>
-                <h3 id="card-global-val">—</h3>
-                <p class="card-sub" id="card-global-pos"></p>
-            </div>
-            <div class="result-card glass" id="card-verdict">
-                <span class="card-label">VERDICT</span>
-                <span class="badge" id="badge-verdict">—</span>
-                <p class="card-sub" id="card-verdict-dist"></p>
-            </div>
-        </section>
-
-        <!-- Visualization Tabs -->
-        <section class="viz-section glass">
-            <div class="tab-bar">
-                <button class="tab active" data-tab="tab-conv">Convergence Chart</button>
-                <button class="tab" data-tab="tab-trace">Optimization Trace</button>
-            </div>
-            <div class="tab-content active" id="tab-conv"><div id="plot-conv" class="plot-box"></div></div>
-            <div class="tab-content" id="tab-trace">
-                <div class="trace-container" id="trace-container">
-                    <p class="muted">Run an optimization to see the step-by-step trace.</p>
+            <!-- Result Cards Row -->
+            <section class="card-row" id="card-row" style="display:none;">
+                <div class="result-card glass" id="card-algo">
+                    <span class="card-label">ALGORITHM</span>
+                    <h3 id="card-algo-name">—</h3>
+                    <p class="card-sub" id="card-algo-steps"></p>
                 </div>
-            </div>
-        </section>
-
-        <!-- Local vs Global Optimum Analysis -->
-        <section class="analysis-section" id="analysis-section" style="display:none;">
-            <h2 class="section-title center">Local vs Global Optimum Analysis</h2>
-            <div class="analysis-cards">
-                <div class="analysis-card glass" id="ana-found">
-                    <span class="badge" id="ana-found-badge">—</span>
-                    <h3>Found Optimum</h3>
-                    <p id="ana-found-pos">Position: —</p>
-                    <p id="ana-found-val">Value: —</p>
-                    <p class="muted" id="ana-found-info"></p>
+                <div class="result-card glass" id="card-found">
+                    <span class="card-label found-label">FOUND MINIMUM</span>
+                    <h3 id="card-found-val">—</h3>
+                    <p class="card-sub" id="card-found-pos"></p>
                 </div>
-                <div class="analysis-card glass" id="ana-global">
-                    <span class="badge badge-green">KNOWN GLOBAL</span>
-                    <h3>Global Optimum</h3>
-                    <p id="ana-global-pos">Position: —</p>
-                    <p id="ana-global-val">Value: —</p>
-                    <p class="muted" id="ana-global-info"></p>
+                <div class="result-card glass" id="card-global">
+                    <span class="card-label global-label">GLOBAL MINIMUM</span>
+                    <h3 id="card-global-val">—</h3>
+                    <p class="card-sub" id="card-global-pos"></p>
                 </div>
-            </div>
-        </section>
-    </main>
-</div>
+                <div class="result-card glass" id="card-verdict">
+                    <span class="card-label">VERDICT</span>
+                    <span class="badge" id="badge-verdict">—</span>
+                    <p class="card-sub" id="card-verdict-dist"></p>
+                </div>
+            </section>
 
-<script src="/static/script.js"></script>
+            <!-- Visualization Tabs -->
+            <section class="viz-section glass">
+                <div class="tab-bar">
+                    <button class="tab active" data-tab="tab-conv">Convergence Chart</button>
+                    <button class="tab" data-tab="tab-trace">Optimization Trace</button>
+                </div>
+                <div class="tab-content active" id="tab-conv">
+                    <div id="plot-conv" class="plot-box"></div>
+                </div>
+                <div class="tab-content" id="tab-trace">
+                    <div class="trace-container" id="trace-container">
+                        <p class="muted">Run an optimization to see the step-by-step trace.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Local vs Global Optimum Analysis -->
+            <section class="analysis-section" id="analysis-section" style="display:none;">
+                <h2 class="section-title center">Local vs Global Optimum Analysis</h2>
+                <div class="analysis-cards">
+                    <div class="analysis-card glass" id="ana-found">
+                        <span class="badge" id="ana-found-badge">—</span>
+                        <h3>Found Optimum</h3>
+                        <p id="ana-found-pos">Position: —</p>
+                        <p id="ana-found-val">Value: —</p>
+                        <p class="muted" id="ana-found-info"></p>
+                    </div>
+                    <div class="analysis-card glass" id="ana-global">
+                        <span class="badge badge-green">KNOWN GLOBAL</span>
+                        <h3>Global Optimum</h3>
+                        <p id="ana-global-pos">Position: —</p>
+                        <p id="ana-global-val">Value: —</p>
+                        <p class="muted" id="ana-global-info"></p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="/static/script.js"></script>
 </body>
+
 </html>

@@ -6,31 +6,31 @@ const $ = (s) => document.querySelector(s);
 const $$ = (s) => document.querySelectorAll(s);
 
 const DOM = {
-    preset:   $('#sel-preset'),
-    customGrp:$('#custom-expr-group'),
-    exprInp:  $('#inp-expr'),
-    algo:     $('#sel-algo'),
-    goal:     $('#sel-goal'),
-    sx:       $('#inp-sx'),
-    sy:       $('#inp-sy'),
+    preset: $('#sel-preset'),
+    customGrp: $('#custom-expr-group'),
+    exprInp: $('#inp-expr'),
+    algo: $('#sel-algo'),
+    goal: $('#sel-goal'),
+    sx: $('#inp-sx'),
+    sy: $('#inp-sy'),
     startGrp: $('#start-pos-group'),
-    rngStep:  $('#rng-step'),
-    lblStep:  $('#lbl-step'),
-    rngIter:  $('#rng-iter'),
-    lblIter:  $('#lbl-iter'),
+    rngStep: $('#rng-step'),
+    lblStep: $('#lbl-step'),
+    rngIter: $('#rng-iter'),
+    lblIter: $('#lbl-iter'),
     rngSpeed: $('#rng-speed'),
     lblSpeed: $('#lbl-speed'),
-    lo:       $('#inp-lo'),
-    hi:       $('#inp-hi'),
-    btnRun:   $('#btn-run'),
+    lo: $('#inp-lo'),
+    hi: $('#inp-hi'),
+    btnRun: $('#btn-run'),
     btnReset: $('#btn-reset'),
-    cardRow:  $('#card-row'),
+    cardRow: $('#card-row'),
     analysis: $('#analysis-section'),
 };
 
 const DARK_LAYOUT = {
     paper_bgcolor: 'rgba(0,0,0,0)',
-    plot_bgcolor:  'rgba(0,0,0,0)',
+    plot_bgcolor: 'rgba(0,0,0,0)',
     font: { color: '#e5e7eb', family: 'Inter, sans-serif', size: 12 },
     margin: { t: 30, r: 20, b: 50, l: 60 },
 };
@@ -88,7 +88,7 @@ function initEmptyChart() {
         x: [], y: [],
         type: 'scatter', mode: 'lines+markers',
         marker: { size: 5, color: '#3b82f6' },
-        line:   { color: '#3b82f6', width: 2 },
+        line: { color: '#3b82f6', width: 2 },
         name: 'f(x,y)',
     }], {
         ...DARK_LAYOUT,
@@ -112,12 +112,12 @@ async function runOptimization() {
         expr,
         algorithm: DOM.algo.value,
         step_size: parseFloat(DOM.rngStep.value),
-        max_iter:  parseInt(DOM.rngIter.value),
-        minimize:  DOM.goal.value === 'minimize',
-        start_x:   parseFloat(DOM.sx.value),
-        start_y:   parseFloat(DOM.sy.value),
-        range_lo:  parseFloat(DOM.lo.value),
-        range_hi:  parseFloat(DOM.hi.value),
+        max_iter: parseInt(DOM.rngIter.value),
+        minimize: DOM.goal.value === 'minimize',
+        start_x: parseFloat(DOM.sx.value),
+        start_y: parseFloat(DOM.sy.value),
+        range_lo: parseFloat(DOM.lo.value),
+        range_hi: parseFloat(DOM.hi.value),
     };
 
     DOM.btnRun.disabled = true;
@@ -202,7 +202,7 @@ function animateConvergenceSingle(path, global) {
         x: [], y: [],
         type: 'scatter', mode: 'lines+markers',
         marker: { size: 5, color: '#3b82f6' },
-        line:   { color: '#3b82f6', width: 2 },
+        line: { color: '#3b82f6', width: 2 },
         name: 'f(x,y)',
     };
     const traceGlobal = {
@@ -229,8 +229,8 @@ function animateConvergenceSingle(path, global) {
             stopAnimation();
             // Highlight final point
             Plotly.extendTraces('plot-conv', {
-                x: [[path[path.length-1].step]],
-                y: [[path[path.length-1].f]],
+                x: [[path[path.length - 1].step]],
+                y: [[path[path.length - 1].f]],
             }, [0]);
             return;
         }
@@ -244,14 +244,14 @@ function animateConvergenceSingle(path, global) {
 function animateConvergenceMulti(data) {
     stopAnimation();
     const delay = parseInt(DOM.rngSpeed.value) || 30;
-    const colors = ['#ef4444','#a855f7','#f59e0b','#3b82f6','#06b6d4','#ec4899'];
+    const colors = ['#ef4444', '#a855f7', '#f59e0b', '#3b82f6', '#06b6d4', '#ec4899'];
 
     // Pre-build all traces (one per restart), all starting empty
     const traces = data.all_runs.map((run, i) => ({
         x: [], y: [],
         type: 'scatter', mode: 'lines+markers',
         marker: { size: 4, color: colors[i % colors.length] },
-        line:   { color: colors[i % colors.length], width: 2 },
+        line: { color: colors[i % colors.length], width: 2 },
         name: `Restart ${run.restart}`,
     }));
     // Add global reference line

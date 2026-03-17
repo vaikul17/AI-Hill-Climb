@@ -8,19 +8,19 @@ const els = {
     optType: document.getElementById('opt-type'),
     speed: document.getElementById('anim-speed'),
     speedLabel: document.getElementById('speed-label'),
-    
+
     btnStart: document.getElementById('btn-start'),
     btnPause: document.getElementById('btn-pause'),
     btnReset: document.getElementById('btn-reset'),
     btnRestart: document.getElementById('btn-random-restart'),
-    
+
     valStep: document.getElementById('val-step'),
     valX: document.getElementById('val-x'),
     valFx: document.getElementById('val-fx'),
     valDir: document.getElementById('val-dir'),
-    
+
     statusMsg: document.getElementById('status-message'),
-    
+
     resX: document.getElementById('res-x'),
     resFx: document.getElementById('res-fx'),
     resIter: document.getElementById('res-iter'),
@@ -38,7 +38,7 @@ let state = {
     pathX: [],
     pathY: [],
     timerId: null,
-    
+
     // config params
     fn: null,
     fnString: '',
@@ -80,7 +80,7 @@ function parseFunction() {
     try {
         const compiled = math.compile(state.fnString);
         state.fn = (x) => compiled.evaluate({ x: x });
-        
+
         // Test evaluation
         state.fn(0);
         return true;
@@ -109,23 +109,23 @@ function resetSimulationState() {
     state.currentStep = 0;
     state.pathX = [];
     state.pathY = [];
-    
+
     els.valStep.textContent = '0';
     els.valX.textContent = '-';
     els.valFx.textContent = '-';
     els.valDir.textContent = '-';
-    
+
     els.resX.textContent = '-';
     els.resFx.textContent = '-';
     els.resIter.textContent = '-';
     els.resType.textContent = '-';
     els.resTypeContainer.className = 'result-row';
-    
+
     els.btnStart.disabled = false;
     els.btnPause.disabled = true;
     els.btnPause.textContent = 'Pause';
     els.funcInput.disabled = false;
-    
+
     setStatus("Ready to start.", "active");
 }
 
@@ -151,13 +151,13 @@ function getPlotRange() {
 
 function drawInitialPlot() {
     if (!state.fn) return;
-    
+
     const range = getPlotRange();
     const xValues = [];
     const yValues = [];
     const points = 300;
     const step = (range.max - range.min) / points;
-    
+
     let minY = Infinity;
     let maxY = -Infinity;
 
@@ -170,7 +170,7 @@ function drawInitialPlot() {
                 if (y < minY) minY = y;
                 if (y > maxY) maxY = y;
             }
-        } catch(e) {}
+        } catch (e) { }
     }
 
     const margin = (maxY - minY) * 0.1;
@@ -178,7 +178,7 @@ function drawInitialPlot() {
 
     const startXVal = parseFloat(els.startX.value) || 0;
     let startYVal = 0;
-    try { startYVal = state.fn(startXVal); } catch(e){}
+    try { startYVal = state.fn(startXVal); } catch (e) { }
 
     const traceFn = {
         x: xValues,
@@ -188,7 +188,7 @@ function drawInitialPlot() {
         name: 'f(x)',
         line: { color: '#8b949e', width: 2 }
     };
-    
+
     const traceStart = {
         x: [startXVal],
         y: [startYVal],
@@ -197,7 +197,7 @@ function drawInitialPlot() {
         name: 'Start',
         marker: { color: '#f85149', size: 10, symbol: 'circle' }
     };
-    
+
     const tracePath = {
         x: [],
         y: [],
@@ -223,8 +223,8 @@ function drawInitialPlot() {
         font: { color: '#e6edf3', family: 'Inter' },
         margin: { t: 30, r: 20, b: 40, l: 50 },
         xaxis: { gridcolor: 'rgba(48,54,61,0.5)', zerolinecolor: 'rgba(139,148,158,0.5)' },
-        yaxis: { 
-            gridcolor: 'rgba(48,54,61,0.5)', 
+        yaxis: {
+            gridcolor: 'rgba(48,54,61,0.5)',
             zerolinecolor: 'rgba(139,148,158,0.5)',
             range: [minY - margin, maxY + margin]
         },
@@ -232,25 +232,25 @@ function drawInitialPlot() {
         hovermode: 'closest'
     };
 
-    Plotly.newPlot('plot-container', [traceFn, traceStart, tracePath, traceCurrent], layout, {responsive: true});
+    Plotly.newPlot('plot-container', [traceFn, traceStart, tracePath, traceCurrent], layout, { responsive: true });
 }
 
 // Simulation logic
 function startSimulation() {
     if (!parseFunction()) return;
-    
+
     state.currentX = parseFloat(els.startX.value) || 0;
     state.stepSize = parseFloat(els.stepSize.value) || 0.1;
     state.maxIter = parseInt(els.maxIter.value) || 100;
     state.isMax = els.optType.value === 'maximize';
-    
+
     try {
         state.currentFx = state.fn(state.currentX);
-    } catch(e) {
+    } catch (e) {
         setStatus("Error evaluating start point.", "warning");
         return;
     }
-    
+
     // UI Updates
     els.btnStart.disabled = true;
     els.btnPause.disabled = false;
@@ -258,13 +258,13 @@ function startSimulation() {
     state.isRunning = true;
     state.isPaused = false;
     state.currentStep = 0;
-    
+
     state.pathX = [state.currentX];
     state.pathY = [state.currentFx];
-    
+
     updateUIMetrics("Start");
     setStatus("Optimization started...", "active");
-    
+
     // Clear old path, set current
     Plotly.update('plot-container', {
         x: [[], [state.currentX]],
@@ -276,7 +276,7 @@ function startSimulation() {
 
 function togglePause() {
     if (!state.isRunning) return;
-    
+
     state.isPaused = !state.isPaused;
     if (state.isPaused) {
         stopTimer();
@@ -303,31 +303,31 @@ function scheduleNextStep() {
 
 function performStep() {
     if (!state.isRunning || state.isPaused) return;
-    
+
     if (state.currentStep >= state.maxIter) {
         finishSimulation("Max iterations reached.");
         return;
     }
-    
+
     state.currentStep++;
-    
+
     const leftX = state.currentX - state.stepSize;
     const rightX = state.currentX + state.stepSize;
-    
+
     let leftY, rightY;
     try {
         leftY = state.fn(leftX);
         rightY = state.fn(rightX);
-    } catch(e) {
+    } catch (e) {
         finishSimulation("Math error during evaluation.");
         return;
     }
-    
+
     // Hill Climbing core logic
     let bestX = state.currentX;
     let bestY = state.currentFx;
     let dir = "None";
-    
+
     if (state.isMax) {
         if (leftY > bestY) { bestX = leftX; bestY = leftY; dir = "Left"; }
         if (rightY > bestY) { bestX = rightX; bestY = rightY; dir = "Right"; }
@@ -335,23 +335,23 @@ function performStep() {
         if (leftY < bestY) { bestX = leftX; bestY = leftY; dir = "Left"; }
         if (rightY < bestY) { bestX = rightX; bestY = rightY; dir = "Right"; }
     }
-    
+
     // Check if we improved
     if (bestX === state.currentX) {
         // Local optimum reached
         finishSimulation("Local/Global Optimum found!");
         return;
     }
-    
+
     // Update state
     state.currentX = bestX;
     state.currentFx = bestY;
     state.pathX.push(state.currentX);
     state.pathY.push(state.currentFx);
-    
+
     updateUIMetrics(dir);
     updatePlotFrame();
-    
+
     scheduleNextStep();
 }
 
@@ -374,13 +374,13 @@ function finishSimulation(reason) {
     els.btnPause.disabled = true;
     els.btnStart.disabled = false;
     els.funcInput.disabled = false;
-    
+
     setStatus(reason, "success");
-    
+
     els.resX.textContent = state.currentX.toFixed(4);
     els.resFx.textContent = state.currentFx.toFixed(4);
     els.resIter.textContent = state.currentStep;
-    
+
     els.resTypeContainer.className = 'result-row highlight';
     // Small heuristic for local vs global: without global info, we just state Local Optimum
     els.resType.textContent = 'Likely Local Optimum';
@@ -390,37 +390,37 @@ function finishSimulation(reason) {
 function runRandomRestart() {
     if (!parseFunction()) return;
     if (state.isRunning) resetSimulation();
-    
+
     const isMax = els.optType.value === 'maximize';
     const stepSize = parseFloat(els.stepSize.value) || 0.1;
     const maxIter = parseInt(els.maxIter.value) || 100;
-    
+
     const tries = 5;
     const range = getPlotRange();
-    
+
     let bestGlobalX = null;
     let bestGlobalY = isMax ? -Infinity : Infinity;
-    
+
     let allPathsX = [];
     let allPathsY = [];
-    
+
     for (let i = 0; i < tries; i++) {
         // Random start point within the observed range
         let x = range.min + Math.random() * (range.max - range.min);
         let y = state.fn(x);
-        
+
         let pathX = [x];
         let pathY = [y];
-        
+
         for (let j = 0; j < maxIter; j++) {
             let leftX = x - stepSize;
             let rightX = x + stepSize;
             let leftY = state.fn(leftX);
             let rightY = state.fn(rightX);
-            
+
             let bestX = x;
             let bestY = y;
-            
+
             if (isMax) {
                 if (leftY > bestY) { bestX = leftX; bestY = leftY; }
                 if (rightY > bestY) { bestX = rightX; bestY = rightY; }
@@ -428,31 +428,31 @@ function runRandomRestart() {
                 if (leftY < bestY) { bestX = leftX; bestY = leftY; }
                 if (rightY < bestY) { bestX = rightX; bestY = rightY; }
             }
-            
+
             if (bestX === x) break;
-            
+
             x = bestX;
             y = bestY;
             pathX.push(x);
             pathY.push(y);
         }
-        
+
         allPathsX.push(pathX);
         allPathsY.push(pathY);
-        
+
         if (isMax) {
             if (y > bestGlobalY) { bestGlobalX = x; bestGlobalY = y; }
         } else {
             if (y < bestGlobalY) { bestGlobalX = x; bestGlobalY = y; }
         }
     }
-    
+
     // Draw all paths as separate traces, temporarily removing existing traces except fn
     const traceFn = document.getElementById('plot-container').data[0];
     const newTraces = [traceFn];
-    
+
     const colors = ['#f85149', '#a371f7', '#d29922', '#58a6ff', '#2ea043'];
-    
+
     for (let i = 0; i < tries; i++) {
         newTraces.push({
             x: allPathsX[i],
@@ -461,7 +461,7 @@ function runRandomRestart() {
             mode: 'lines',
             opacity: 0.6,
             line: { color: colors[i % colors.length], width: 2 },
-            name: `Try ${i+1}`
+            name: `Try ${i + 1}`
         });
         // End point
         newTraces.push({
@@ -473,7 +473,7 @@ function runRandomRestart() {
             showlegend: false
         });
     }
-    
+
     // Highlight the global best out of the restarts
     newTraces.push({
         x: [bestGlobalX],
@@ -481,13 +481,13 @@ function runRandomRestart() {
         type: 'scatter',
         mode: 'markers',
         name: 'Best Found',
-        marker: { color: '#ffffff', size: 14, symbol: 'star', line: {color: '#d29922', width: 2} }
+        marker: { color: '#ffffff', size: 14, symbol: 'star', line: { color: '#d29922', width: 2 } }
     });
-    
+
     Plotly.react('plot-container', newTraces, document.getElementById('plot-container').layout);
-    
+
     setStatus(`Ran ${tries} random restarts. Best found: x=${bestGlobalX.toFixed(4)}, f(x)=${bestGlobalY.toFixed(4)}`, "success");
-    
+
     // Update results
     els.resX.textContent = bestGlobalX.toFixed(4);
     els.resFx.textContent = bestGlobalY.toFixed(4);
