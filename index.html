@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hill Climbing Optimization</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Math.js for function evaluation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js"></script>
+    <!-- Plotly.js for charting -->
+    <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <h1>Hill Climbing Optimization</h1>
+            <p>Visualizing the search for local/global optima</p>
+        </header>
+
+        <div class="main-content">
+            <!-- Left Panel: Controls -->
+            <aside class="panel controls-panel glass">
+                <h2>Algorithm Configuration</h2>
+                
+                <div class="form-group">
+                    <label for="function-preset">Sample Functions</label>
+                    <select id="function-preset">
+                        <option value="custom">Custom Function</option>
+                        <option value="x^2 - 4x + 3">x^2 - 4x + 3 (Simple Convex)</option>
+                        <option value="sin(x) + x^2 * 0.1">sin(x) + 0.1x^2 (Multiple Optima)</option>
+                        <option value="-(x^4 - 3x^3 + 2)"><!-- Reverse for max -->-(x^4 - 3x^3 + 2) (Complex)</option>
+                        <option value="x * sin(x)">x * sin(x) (Many local optima)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="function-input">Objective Function f(x)</label>
+                    <input type="text" id="function-input" value="x^2 - 4x + 3" placeholder="e.g., x^2 - 4x + 3">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group half">
+                        <label for="start-x">Start X</label>
+                        <input type="number" id="start-x" value="0" step="0.1">
+                    </div>
+                    <div class="form-group half">
+                        <label for="step-size">Step Size</label>
+                        <input type="number" id="step-size" value="0.1" step="0.01">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group half">
+                        <label for="max-iter">Max Iterations</label>
+                        <input type="number" id="max-iter" value="100" min="1">
+                    </div>
+                    <div class="form-group half">
+                        <label for="opt-type">Goal</label>
+                        <select id="opt-type">
+                            <option value="minimize">Minimize</option>
+                            <option value="maximize">Maximize</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="anim-speed">Animation Speed (ms)</label>
+                    <input type="range" id="anim-speed" min="10" max="1000" value="200" step="10">
+                    <span id="speed-label" class="range-value">200 ms</span>
+                </div>
+
+                <div class="button-group">
+                    <button id="btn-start" class="btn primary">Start Optimization</button>
+                    <button id="btn-pause" class="btn secondary" disabled>Pause</button>
+                    <button id="btn-reset" class="btn outline">Reset</button>
+                </div>
+
+                <hr class="divider">
+                
+                <button id="btn-random-restart" class="btn accent">Try Random Restart</button>
+            </aside>
+
+            <!-- Center: Visualization -->
+            <main class="panel viz-panel glass">
+                <div id="plot-container"></div>
+            </main>
+
+            <!-- Right Panel: Results & Iteration Info -->
+            <aside class="panel results-panel glass">
+                <h2>Current State</h2>
+                
+                <div class="state-metrics">
+                    <div class="metric">
+                        <span class="label">Step</span>
+                        <span class="value" id="val-step">0</span>
+                    </div>
+                    <div class="metric">
+                        <span class="label">Current X</span>
+                        <span class="value" id="val-x">-</span>
+                    </div>
+                    <div class="metric">
+                        <span class="label">Current f(x)</span>
+                        <span class="value" id="val-fx">-</span>
+                    </div>
+                    <div class="metric">
+                        <span class="label">Direction</span>
+                        <span class="value" id="val-dir">-</span>
+                    </div>
+                </div>
+
+                <div class="status-box" id="status-message">
+                    Ready to start simulation.
+                </div>
+
+                <h2 class="mt-4">Final Results</h2>
+                <div class="results-content">
+                    <div class="result-row">
+                        <span>Optimum X:</span>
+                        <strong id="res-x">-</strong>
+                    </div>
+                    <div class="result-row">
+                        <span>Optimum f(x):</span>
+                        <strong id="res-fx">-</strong>
+                    </div>
+                    <div class="result-row">
+                        <span>Iterations:</span>
+                        <strong id="res-iter">-</strong>
+                    </div>
+                    <div class="result-row highlight" id="res-type-container">
+                        <span>Optimum Type:</span>
+                        <strong id="res-type">-</strong>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <!-- Custom JS -->
+    <script src="script.js"></script>
+</body>
+</html>
